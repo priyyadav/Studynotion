@@ -112,3 +112,48 @@ exports.getAllCourse=async (req, res)=>
       }) 
     }
 }
+
+exports.getCourseDetails=async(res, req)=>
+{
+    try
+    {
+      const {courseId}=req.body;
+      const courseDetails=await Course.find({_id:courseId}).populate(
+        {
+            path:"instructor",
+            populate:
+            {
+                path:"additionalDetails"
+            }
+        }).populate("category")
+        .populate("ratingAndReviews")
+        .populate({
+            path:"courseContent",
+            populate:
+            {
+                path:"subSection"
+            },
+        })
+        .exec()
+        if(!courseDetails)
+        {
+            return res.status(400).json({
+                success: false,
+                message: `colud not find course detial width ${courseId}`,
+            
+          })   
+        }
+        return res.status(200).json({
+            success: true,
+            courseDetails
+        
+      })
+    }
+    catch(error)
+    {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+      }) 
+    }
+}
